@@ -1,0 +1,127 @@
+//OBSTACLE AVOIDANCE
+#include<Servo.h>
+
+#define LA 2
+#define LB 3
+#define RA 4
+#define RB 5
+
+#define ENA 6
+#define ENB 7
+
+#define TrigPin 13
+#define EchoPin 12
+
+Servo SM;
+
+void setup() {
+  //Motor Driver Pin Mode Settings
+  pinMode(LA, OUTPUT);
+  pinMode(LB, OUTPUT);
+  pinMode(RA, OUTPUT);
+  pinMode(RB, OUTPUT);
+  pinMode(ENA, OUTPUT);
+  pinMode(ENB, OUTPUT);
+
+  analogWrite(ENA, 255);
+  analogWrite(ENB, 255);
+
+  //Ultrasonic Pin Mode Settings
+  pinMode(TrigPin, OUTPUT);
+  pinMode(EchoPin, INPUT);
+
+  //Initialize The Serial Port
+  Serial.begin(9600);
+
+  //Initialize The Servo Motor
+  SM.attach(9);
+  SM.write(90);
+  delay(3000);
+
+}
+int distance;
+void loop() {
+  // put your main code here, to run repeatedly:
+  FindDistance();
+  if (distance > 40) {
+    Forward();
+  } else {
+    Stop();
+    delay(50);
+    FindDistance();
+    if (distance > 40) {
+      Forward();
+    } else {
+      SM.write(40);
+      delay(500);
+      FindDistance();
+      if (distance > 40) {
+        SM.write(90);
+        delay(500);
+        Right();
+        delay(300);
+      } else {
+        SM.write(140);
+        delay(1000);
+        FindDistance();
+        if (distance > 40) {
+          SM.write(90);
+          delay(500);
+          Left();
+          delay(300);
+        } else {
+          SM.write(90);
+          delay(500);
+          Left();
+          delay(700);
+        }
+      }
+
+    }
+  }
+}
+
+void Forward() {
+  digitalWrite(LA, HIGH);
+  digitalWrite(LB, LOW);
+  digitalWrite(RA, HIGH);
+  digitalWrite(RB, LOW);
+}
+
+void BackWard() {
+  digitalWrite(LA, LOW);
+  digitalWrite(LB, HIGH);
+  digitalWrite(RA, LOW);
+  digitalWrite(RB, HIGH);
+}
+
+void Right() {
+  digitalWrite(LA, HIGH);
+  digitalWrite(LB, LOW);
+  digitalWrite(RA, LOW);
+  digitalWrite(RB, HIGH);
+}
+
+void Left() {
+  digitalWrite(LA, LOW);
+  digitalWrite(LB, HIGH);
+  digitalWrite(RA, HIGH);
+  digitalWrite(RB, LOW);
+}
+
+void Stop() {
+  digitalWrite(LA, LOW);
+  digitalWrite(LB, LOW);
+  digitalWrite(RA, LOW);
+  digitalWrite(RB, LOW);
+}
+void FindDistance() {
+  int duration;
+  digitalWrite(TrigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(TrigPin, LOW);
+  duration = pulseIn(EchoPin, HIGH);
+  distance = (duration / 2) * (1 / 29.1);
+  Serial.println(distance);
+  delay(60);
+}
